@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post('/tasks', auth, rbac(['Admin', 'Manager']), createTask,apiLimiter);
 router.get('/tasks', auth, getTasks,apiLimiter);
-router.put('/tasks/:taskId', auth, rbac(['Admin', 'Manager']), updateTask),apiLimiter;
+router.put('/tasks/:taskId', auth, rbac(['Admin', 'Manager']), updateTask,apiLimiter);
 router.delete('/tasks/:taskId', auth, rbac(['Admin']), deleteTask,apilimiter);
 
 module.exports = router;
