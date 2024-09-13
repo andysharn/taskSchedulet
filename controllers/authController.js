@@ -31,10 +31,8 @@ const register = async (req, res) => {
             console.log('User saved:', savedUser);
             const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-            // Send the confirmation email after successful registration
             await sendConfirmationEmail(email, username);
 
-            // Return the token to the user
             res.status(201).json({ token });
         })
         .catch(err => {
@@ -62,14 +60,14 @@ const login = async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-            expiresIn: '1h' // Token expiration time
+            expiresIn: '2h' // Token expiration time
         });
 
         // Set JWT as a cookie (httpOnly for security)
         res.cookie('token', token, {
             httpOnly: true,      // Prevent access to the cookie via JavaScript (XSS protection)
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 7200000      // Cookie expiration time (1 hour)
+            maxAge: 7200000      // Cookie expiration time (2 hour)
 
         });
 
@@ -89,39 +87,29 @@ const logout = (req, res) => {
 
 const getProfile =  async (req, res) => {
     try {
-        // Fetch the user profile from the database (excluding the password)
-        const user = await User.findById(req.user.id).select('-password');
-        
+        const user = await User.findById(req.user.id).select('-password');  
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
-
-        // Extract query parameters for filtering, sorting, and pagination
         const { status, priority, sortBy = 'dueDate', order = 'asc', limit = 5, page = 1 } = req.query;
 
-        // Build the query object based on filtering criteria
         let query = { assignedTo: req.user.id };
 
-        // Add status filter if provided (e.g., status=Pending)
         if (status) {
             query.status = status;
         }
 
-        // Add priority filter if provided (e.g., priority=High)
         if (priority) {
             query.priority = priority;
         }
 
-        // Calculate pagination variables
         const skip = (page - 1) * limit;
 
-        // Fetch tasks based on query, sorting, and pagination
         const tasks = await Task.find(query)
-            .sort({ [sortBy]: order === 'desc' ? -1 : 1 })  // Sort by the specified field and order
-            .skip(skip)  // Skip documents for pagination
-            .limit(parseInt(limit));  // Limit the number of results
+            .sort({ [sortBy]: order === 'desc' ? -1 : 1 }) 
+            .skip(skip) 
+            .limit(parseInt(limit)); 
 
-        // Return user profile and tasks in the response
         res.status(200).json({
             user,
             tasks,
