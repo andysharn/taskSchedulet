@@ -1,9 +1,9 @@
-const mailjet = require('node-mailjet');  // Require Mailjet
+const mailjet = require('node-mailjet');  
 
 // Create Mailjet client with API key and secret
 const mailjetClient = mailjet.apiConnect(
-    "d49ba46226463e9670dcf39f47868584", 
-    "9d1968e503606543e4615eefd5c086c8"
+    process.env.id, 
+    process.env.security_key
 );
 
 // Function to send task notification emails using Mailjet
@@ -15,7 +15,7 @@ const sendTaskNotification = async (email, taskTitle, action) => {
             "Messages": [
                 {
                     From: {
-                        Email: "abhishek.sharmaxyz05971@gmail.com",
+                        Email: process.env.email,
                       },
                     "To": [
                         {
@@ -39,9 +39,8 @@ const sendTaskNotification = async (email, taskTitle, action) => {
 };
 
 
-// Function to notify users via real-time updates (Socket.io)
 const notifyTaskUpdate = (taskId, action) => {
-    const io = require('../server').io; // Access the Socket.io instance
+    const io = require('../server').io;
     io.emit('taskUpdated', { taskId, action });
 };
 
