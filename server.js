@@ -1,6 +1,5 @@
 const http = require('http');
 const mongoose = require('mongoose');
-const socketIo = require('socket.io');
 const app = require('./app');
 require('dotenv').config(); // Load environment variables from .env
 
@@ -21,13 +20,6 @@ mongoose.connect(process.env.MONGO_URI, {
 const server = http.createServer(app);
 const io = socketIo(server);
 
-// Socket.io configuration
-io.on('connection', (socket) => {
-    console.log('New client connected');
-    socket.on('disconnect', () => {
-        console.log('Client disconnected');
-    });
-});
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
