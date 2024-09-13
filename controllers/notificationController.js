@@ -2,7 +2,7 @@ const mailjet = require('node-mailjet');
 
 // Create Mailjet client with API key and secret
 const mailjetClient = mailjet.apiConnect(
-    process.env.id, 
+    process.env.Api_key, 
     process.env.security_key
 );
 
