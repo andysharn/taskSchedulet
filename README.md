@@ -315,7 +315,7 @@ This README provides detailed information on the API endpoints and middleware us
 **Description:** Checks if the authenticated user has the required roles to access a route.
 
 **Parameters:**
-- `allowedRoles` (Array): Array of roles allowed to access the route.
+- `allowedRoles` ['User','Admin','Manager']: Array of roles allowed to access the route.
 
 **Usage:**
 - Protects routes based on user roles by checking the user's role against the allowed roles.
