@@ -325,3 +325,103 @@ This README provides detailed information on the API endpoints and middleware us
 For further details, feel free to reach out or refer to the codebase.
 
 ---
+
+---
+
+## Security Measures
+
+Our application implements several security best practices to ensure data integrity and protect against various attacks. Below is a list of security measures integrated into the system:
+
+### 1. **Helmet**
+Helmet is a middleware for Express.js applications that helps secure HTTP headers. It provides protection against a variety of attacks, including but not limited to:
+
+- **Cross-Site Scripting (XSS)**
+- **Clickjacking**
+- **Content Security Policy (CSP) Violations**
+  
+**How it works:**
+Helmet automatically sets secure HTTP headers like `X-Frame-Options`, `X-XSS-Protection`, `X-Content-Type-Options`, and others, which help prevent malicious scripts and protect the integrity of the application's communication with browsers.
+
+```js
+const helmet = require('helmet');
+app.use(helmet());
+```
+
+### 2. **Argon2id Hashing for Passwords**
+We use **Argon2id**, a highly secure and recommended password-hashing algorithm, to hash user passwords before storing them in the database. This helps prevent password theft even if the database is compromised.
+
+**How it works:**
+Argon2id is a memory-hard algorithm designed to resist both brute-force attacks and GPU-based cracking. The hashed password includes a salt and is computationally expensive to calculate, making it highly secure.
+
+```js
+const argon2 = require('argon2');
+const hashPassword = async (password) => {
+    const hashedPassword = await argon2.hash(password, {
+        type: argon2.argon2id
+    });
+    return hashedPassword;
+};
+```
+
+- **Prevents:** Brute-force attacks, dictionary attacks, and rainbow table attacks.
+
+### 3. **Input Validation with Joi**
+We use **Joi** for input validation to ensure that all incoming data is sanitized and meets the expected format before processing. This helps mitigate common injection attacks.
+
+**How it works:**
+Joi allows us to define schemas that describe the shape and constraints of the input data. It automatically validates incoming requests and rejects those that don't match the criteria.
+
+```js
+const Joi = require('joi');
+
+const userSchema = Joi.object({
+    username: Joi.string().alphanum().min(3).max(30).required(),
+    password: Joi.string().min(8).required(),
+    email: Joi.string().email().required()
+});
+
+const validateUser = (data) => userSchema.validate(data);
+```
+
+- **Prevents:** SQL Injection, NoSQL Injection, and Cross-Site Scripting (XSS) by ensuring that invalid or malicious data is never processed by the application.
+
+### 4. **JSON Web Token (JWT) Authentication**
+For securing user authentication, we implement JWT-based authentication. JWT tokens are securely signed and used for verifying user sessions without sharing sensitive user data in each request.
+
+**How it works:**
+JWT tokens are signed using a secret key and can only be decoded by the server, ensuring that user data is protected during communication.
+
+```js
+const jwt = require('jsonwebtoken');
+
+const generateToken = (user) => {
+    return jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET, {
+        expiresIn: '1h'
+    });
+};
+```
+
+- **Prevents:** Token hijacking and protects against replay attacks when implemented with proper expiration times.
+
+### 5. **Rate Limiting**
+To prevent brute-force attacks and protect the application from Denial of Service (DoS) attacks, we implement rate limiting on API requests.
+
+**How it works:**
+Rate limiting restricts the number of requests an IP address can make to the server within a certain timeframe.
+
+```js
+const rateLimit = require('express-rate-limit');
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // Limit each IP to 100 requests per windowMs
+});
+app.use('/api/', apiLimiter);
+```
+
+- **Prevents:** Brute-force attacks and protects the system from being overwhelmed by traffic.
+
+
+
+These security measures combined create a robust protection layer around the application, ensuring both user and data security. They safeguard the system from common attacks like XSS, SQL Injection, brute-force, and more, making the application more secure and reliable.
+
+--- 
